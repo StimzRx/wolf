@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "wt3lbmo5PidLQt2DOFL3mk4CT0G5fB63S7nPtfNfIB4=",
+  "Source": "WolfApiServer",
+  "BasePath": "_content/WolfApiServer",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
