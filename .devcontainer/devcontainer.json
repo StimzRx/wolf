@@ -17,7 +17,7 @@
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": true,
-      "installDockerBuildx": false
+      "installDockerBuildx": true
     }
   },
   "runArgs": [

@@ -133,16 +133,18 @@ The TOML configuration file is read only once at startup (or created if not pres
 ....
 hostname = "wolf"   #<1>
 support_hevc = true #<2>
-config_version = 2 #<3>
-uuid = "0f75f4d1-e28e-410a-b318-c0579f18f8d1" #<4>
+support_overlayfs = false #<3>
+config_version = 2 #<4>
+uuid = "0f75f4d1-e28e-410a-b318-c0579f18f8d1" #<5>
 
-paired_clients = [] #<5>
-apps = [] #<6>
-gstreamer = {} #<7>
+paired_clients = [] #<6>
+apps = [] #<7>
+gstreamer = {} #<8>
 ....
 
 <1> *hostname*: this is the name that will be displayed in the list of hosts in the Moonlight UI
 <2> *support_hevc*: when set to `false` will disable support for HEVC in Moonlight
+<3> *support_overlayfs*: when set to `true` will allow support for OverlayFS (additional configuration needed!)
 <3> *config_version*: The version of this config file
 <4> *uuid*: a randomly generated UUID, it's used by Moonlight to know if the current host has already been paired
 <5> *paired_clients*: a list of all the Moonlight clients that have succesfully completed the pairing process; it'll be populated by Wolf and saved to this file.

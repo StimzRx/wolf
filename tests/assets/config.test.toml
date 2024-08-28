@@ -5,6 +5,9 @@ uuid = "0000-1111-2222-3333"
 # Set to false if this host doesn't support HEVC
 support_hevc = true
 support_av1 = false
+# Set to true to enable wolf to support Overlay File System(OverlayFS)
+# Note: Additional configuration required!
+support_overlayfs = false
 # The version of this config file
 config_version = 4
 

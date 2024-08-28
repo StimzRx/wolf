@@ -4,6 +4,9 @@ hostname = "Wolf"
 support_hevc = true
 # Set to true if this host supports AV1 (EXPERIMENTAL)
 support_av1 = false
+# Set to true to enable wolf to support Overlay File System(OverlayFS)
+# Note: Additional configuration required!
+support_overlayfs = false
 # The version of this config file
 config_version = 3
 

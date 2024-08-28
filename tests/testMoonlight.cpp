@@ -23,6 +23,7 @@ TEST_CASE("LocalState load TOML", "[LocalState]") {
   REQUIRE(state.hostname == "Wolf");
   REQUIRE(state.uuid == "0000-1111-2222-3333");
   REQUIRE(state.support_hevc);
+  REQUIRE(state.support_overlayfs);
 
   SECTION("Apps") {
     REQUIRE_THAT(state.apps, Catch::Matchers::SizeIs(2));

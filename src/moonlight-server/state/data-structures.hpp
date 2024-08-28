@@ -122,6 +122,7 @@ struct Config {
   std::string config_source;
   bool support_hevc;
   bool support_av1;
+  bool support_overlayfs;
 
   /**
    * Mutable, paired_clients will be loaded up on startup
