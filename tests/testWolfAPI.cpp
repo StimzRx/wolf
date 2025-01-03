@@ -253,6 +253,16 @@ TEST_CASE("Sessions APIs", "[API]") {
   REQUIRE(sessions2.success);
   REQUIRE(sessions2.sessions.size() == 1);
 
+  // Test that we can send input to a session
+  auto input_request = StreamSessionHandleInputRequest{
+      .session_id = "10594003729173467913",
+      // example CONTROLLER_MULTI packet
+      .input_packet_b64 = "060222000000001E0C0000001A000000010014000010000000000000000000009C0000005500"};
+  response =
+      req(curl.get(), HTTPMethod::POST, "http://localhost/api/v1/sessions/input", rfl::json::write(input_request));
+  REQUIRE(response);
+  REQUIRE_THAT(response->second, Equals("{\"success\":true}"));
+
   // Test that we can pause a session
   auto pause_request = StreamSessionPauseRequest{.session_id = "10594003729173467913"};
   response =

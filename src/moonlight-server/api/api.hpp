@@ -3,6 +3,7 @@
 #include <api/http_server.hpp>
 #include <events/events.hpp>
 #include <events/reflectors.hpp>
+#include <moonlight/control.hpp>
 #include <state/data-structures.hpp>
 
 namespace wolf::api {
@@ -62,6 +63,14 @@ struct StreamSessionStopRequest {
   std::string session_id;
 };
 
+struct StreamSessionHandleInputRequest {
+  std::string session_id;
+  rfl::Description<"A base64 encoded Moonlight input packet, for the full format see: "
+                   "https://games-on-whales.github.io/wolf/stable/protocols/input-data.html",
+                   std::string>
+      input_packet_b64;
+};
+
 struct RunnerStartRequest {
   bool stop_stream_when_over;
   rfl::TaggedUnion<"type", wolf::config::AppCMD, wolf::config::AppDocker, wolf::config::AppChildSession> runner;
@@ -98,6 +107,7 @@ private:
   void endpoint_StreamSessionAdd(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionPause(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionStop(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
+  void endpoint_StreamSessionHandleInput(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
 
   void endpoint_RunnerStart(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
 

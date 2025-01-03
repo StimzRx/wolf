@@ -1,4 +1,5 @@
 #include <api/api.hpp>
+#include <control/input_handler.hpp>
 #include <state/config.hpp>
 #include <state/sessions.hpp>
 
@@ -199,6 +200,27 @@ void UnixSocketServer::endpoint_StreamSessionStop(const HTTPRequest &req, std::s
     logs::log(logs::warning, "[API] Invalid event: {} - {}", req.body, session.error()->what());
     auto res = GenericErrorResponse{.error = session.error()->what()};
     send_http(socket, 500, rfl::json::write(res));
+  }
+}
+
+void UnixSocketServer::endpoint_StreamSessionHandleInput(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket) {
+  auto input_request = rfl::json::read<StreamSessionHandleInputRequest>(req.body);
+  if (input_request) {
+    auto sessions = state_->app_state->running_sessions->load();
+    auto session_id = std::stoul(input_request.value().session_id);
+    if (auto session = state::get_session_by_id(sessions.get(), session_id)) {
+      control::INPUT_PKT *input_pkt = reinterpret_cast<control::INPUT_PKT *>(
+          crypto::hex_to_str(input_request.value().input_packet_b64.get(), true).data());
+      control::handle_input(session.value(), {}, input_pkt);
+
+      send_http(socket, 200, rfl::json::write(GenericSuccessResponse{.success = true}));
+    } else {
+      logs::log(logs::warning, "[API] Invalid session_id: {}", input_request.value().session_id);
+      send_http(socket, 500, rfl::json::write(GenericErrorResponse{.error = "Invalid session_id"}));
+    }
+  } else {
+    logs::log(logs::warning, "[API] Invalid event: {} - {}", req.body, input_request.error()->what());
+    send_http(socket, 500, rfl::json::write(GenericErrorResponse{.error = input_request.error()->what()}));
   }
 }
 
