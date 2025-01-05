@@ -50,9 +50,21 @@ struct AppDeleteRequest {
   std::string id;
 };
 
+struct StreamSessionCreated {
+  bool success = true;
+  std::string session_id;
+};
+
 struct StreamSessionListResponse {
   bool success = true;
   std::vector<rfl::Reflector<wolf::core::events::StreamSession>::ReflType> sessions;
+};
+
+struct StreamSessionStartRequest {
+  std::string session_id;
+
+  wolf::core::events::VideoSession video_session;
+  wolf::core::events::AudioSession audio_session;
 };
 
 struct StreamSessionPauseRequest {
@@ -105,6 +117,7 @@ private:
 
   void endpoint_StreamSessions(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionAdd(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
+  void endpoint_StreamSessionStart(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionPause(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionStop(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionHandleInput(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);

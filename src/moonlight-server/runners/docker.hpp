@@ -70,7 +70,7 @@ public:
     return RunDocker(std::move(ev_bus),
                      runner_cfg.base_create_json.value_or(R"({
 "HostConfig": {
-  "IpcMode": "host",
+  "IpcMode": "host"
 }
 })"),
                      Container{.id = "",

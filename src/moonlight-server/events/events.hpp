@@ -101,6 +101,7 @@ struct VideoSession {
 
   std::uint16_t port;
   int timeout_ms;
+  bool wait_for_ping = true;
 
   int packet_size;
   int frames_with_invalid_ref_threshold;
@@ -126,6 +127,7 @@ struct AudioSession {
   std::string aes_iv;
 
   std::uint16_t port;
+  bool wait_for_ping = true;
   std::string client_ip;
 
   int packet_duration;

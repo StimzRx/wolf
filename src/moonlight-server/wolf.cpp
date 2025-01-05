@@ -389,17 +389,20 @@ auto setup_sessions_handlers(const immer::box<state::AppState> &app_state,
           logs::log(logs::debug, "Video session {}, waiting for PING...", sess->session_id);
 
           // Stop here until we get a PING
-          auto status = port_fut.wait_for(boost::chrono::milliseconds(DEFAULT_SESSION_TIMEOUT_MILLIS));
-          if (status != boost::future_status::ready) {
-            logs::log(logs::warning, "Video session {} timed out waiting for PING", sess->session_id);
-            return;
-          }
-          auto client_port = port_fut.get();
-          cancel_event.unregister();
-          ev_handler.unregister();
+          unsigned short client_port = 0;
+          if (sess->wait_for_ping) {
+            auto status = port_fut.wait_for(boost::chrono::milliseconds(DEFAULT_SESSION_TIMEOUT_MILLIS));
+            if (status != boost::future_status::ready) {
+              logs::log(logs::warning, "Video session {} timed out waiting for PING", sess->session_id);
+              return;
+            }
+            client_port = port_fut.get();
+            cancel_event.unregister();
+            ev_handler.unregister();
 
-          if (*cancel_job) {
-            return;
+            if (*cancel_job) {
+              return;
+            }
           }
 
           streaming::start_streaming_video(sess, app_state->event_bus, client_port);
@@ -434,17 +437,20 @@ auto setup_sessions_handlers(const immer::box<state::AppState> &app_state,
           logs::log(logs::debug, "Audio session {}, waiting for PING...", sess->session_id);
 
           // Stop here until we get a PING
-          auto status = port_fut.wait_for(boost::chrono::milliseconds(DEFAULT_SESSION_TIMEOUT_MILLIS));
-          if (status != boost::future_status::ready) {
-            logs::log(logs::warning, "Audio session {} timed out waiting for PING", sess->session_id);
-            return;
-          }
-          auto client_port = port_fut.get();
-          cancel_event.unregister();
-          ev_handler.unregister();
+          unsigned short client_port = 0;
+          if (sess->wait_for_ping) {
+            auto status = port_fut.wait_for(boost::chrono::milliseconds(DEFAULT_SESSION_TIMEOUT_MILLIS));
+            if (status != boost::future_status::ready) {
+              logs::log(logs::warning, "Audio session {} timed out waiting for PING", sess->session_id);
+              return;
+            }
+            client_port = port_fut.get();
+            cancel_event.unregister();
+            ev_handler.unregister();
 
-          if (*cancel_job) {
-            return;
+            if (*cancel_job) {
+              return;
+            }
           }
 
           auto audio_server_name = audio_server ? audio::get_server_name(audio_server->server)
