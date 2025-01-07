@@ -6,8 +6,8 @@ ENV DEB_BUILD_OPTIONS=noddebs
 
 ARG GSTREAMER_VERSION=1.25.1
 ENV GSTREAMER_VERSION=$GSTREAMER_VERSION
-# Change this to 1.25.1 once released
-ARG GSTREAMER_SHA_COMMIT=671281d860899e9a236f604076831a9ce72186b8
+# Change this to 1.25.1 once released, this is to bring in nvav1enc
+ARG GSTREAMER_SHA_COMMIT=8f5caeb86d38aa66107ae83181b3eb1872be7875
 ENV GSTREAMER_SHA_COMMIT=$GSTREAMER_SHA_COMMIT
 
 ENV SOURCE_PATH=/sources/
@@ -20,7 +20,7 @@ Standards-Version: 3.9.2
 Package: gstreamer-wolf
 Version: $GSTREAMER_VERSION
 Depends: libc6, libcap2, libcap2-bin, libdw1, libglib2.0-0, libunwind8,
-          zlib1g, libdrm2, libva2, libmfx1, libpulse0, libxdamage1, libx265-199, libopus0,
+          zlib1g, libdrm2, libva2, libmfx1, libpulse0, libxdamage1, libx265-209, libopus0,
           libegl1, libgl1, libgles2, libudev1, libva-drm2, libva-wayland2, libva-x11-2, libva2,
           libwayland-client0, libx11-6, libxrandr2, libvpl2, libzxing3, libopenexr-3-1-30, librsvg2-2, libwebp7,
           libcairo2, libcairo-gobject2, libjpeg8, libopenjp2-7, liblcms2-2, libzbar0, libaom3
