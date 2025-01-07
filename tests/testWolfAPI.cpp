@@ -6,6 +6,7 @@
 #include <state/config.hpp>
 
 using Catch::Matchers::Equals;
+using Catch::Matchers::ContainsSubstring;
 
 using namespace wolf::api;
 using curl_ptr = std::unique_ptr<CURL, decltype(&curl_easy_cleanup)>;
@@ -244,7 +245,7 @@ TEST_CASE("Sessions APIs", "[API]") {
       .client_ip = "127.0.0.1"};
   response = req(curl.get(), HTTPMethod::POST, "http://localhost/api/v1/sessions/add", rfl::json::write(session));
   REQUIRE(response);
-  REQUIRE_THAT(response->second, Equals("{\"success\":true}"));
+  REQUIRE_THAT(response->second, Catch::Matchers::ContainsSubstring("{\"success\":true,\"session_id\":"));
 
   // Test that the new session is in the list
   response = req(curl.get(), HTTPMethod::GET, "http://localhost/api/v1/sessions");
