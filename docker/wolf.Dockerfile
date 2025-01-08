@@ -52,6 +52,7 @@ RUN --mount=type=cache,target=/cache/ccache \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DCMAKE_CXX_STANDARD=17 \
     -DCMAKE_CXX_EXTENSIONS=OFF \
+    -DCMAKE_CXX_FLAGS="-Wno-missing-template-arg-list-after-template-kw" \
     -DBUILD_SHARED_LIBS=OFF \
     -DBoost_USE_STATIC_LIBS=ON \
     -DBUILD_FAKE_UDEV_CLI=ON \
