@@ -77,10 +77,10 @@ struct StreamSessionStopRequest {
 
 struct StreamSessionHandleInputRequest {
   std::string session_id;
-  rfl::Description<"A base64 encoded Moonlight input packet, for the full format see: "
+  rfl::Description<"A HEX encoded Moonlight input packet, for the full format see: "
                    "games-on-whales.github.io/wolf/stable/protocols/input-data.html",
                    std::string>
-      input_packet_b64;
+      input_packet_hex;
 };
 
 struct RunnerStartRequest {

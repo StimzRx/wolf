@@ -237,8 +237,9 @@ void UnixSocketServer::endpoint_StreamSessionHandleInput(const HTTPRequest &req,
     auto sessions = state_->app_state->running_sessions->load();
     auto session_id = std::stoul(input_request.value().session_id);
     if (auto session = state::get_session_by_id(sessions.get(), session_id)) {
-      control::INPUT_PKT *input_pkt = reinterpret_cast<control::INPUT_PKT *>(
-          crypto::hex_to_str(input_request.value().input_packet_b64.get(), true).data());
+      auto hex_pkt = input_request.value().input_packet_hex.get();
+      auto pkt_parsed = crypto::hex_to_str(hex_pkt);
+      control::INPUT_PKT *input_pkt = reinterpret_cast<control::INPUT_PKT *>(pkt_parsed.data());
       control::handle_input(session.value(), {}, input_pkt);
 
       send_http(socket, 200, rfl::json::write(GenericSuccessResponse{.success = true}));
