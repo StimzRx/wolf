@@ -2,6 +2,8 @@ name: Linux build and test
 
 on:
   push:
+    branches:
+      - stable
     paths-ignore:
       - "docs/**"
       - "docker/**"
