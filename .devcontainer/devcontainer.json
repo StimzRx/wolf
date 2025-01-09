@@ -15,10 +15,11 @@
         "docker"
       ]
     },
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "moby": true,
-      "installDockerBuildx": false
-    }
+    // Doesn't work on ubuntu oracular
+    //    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+    //      "moby": false,
+    //      "installDockerBuildx": false
+    //    }
   },
   "runArgs": [
     "--network=host",
@@ -28,6 +29,8 @@
     "/etc/wolf:/etc/wolf:rw",
     "-v",
     "/run/udev:/run/udev:ro",
+    "-v",
+    "/var/run/docker.sock",
     "--rm"
   ],
   "hostRequirements": {

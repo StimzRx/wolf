@@ -6,6 +6,7 @@
 #include <state/config.hpp>
 
 using Catch::Matchers::Equals;
+using Catch::Matchers::ContainsSubstring;
 
 using namespace wolf::api;
 using curl_ptr = std::unique_ptr<CURL, decltype(&curl_easy_cleanup)>;
@@ -244,7 +245,7 @@ TEST_CASE("Sessions APIs", "[API]") {
       .client_ip = "127.0.0.1"};
   response = req(curl.get(), HTTPMethod::POST, "http://localhost/api/v1/sessions/add", rfl::json::write(session));
   REQUIRE(response);
-  REQUIRE_THAT(response->second, Equals("{\"success\":true}"));
+  REQUIRE_THAT(response->second, Catch::Matchers::ContainsSubstring("{\"success\":true,\"session_id\":"));
 
   // Test that the new session is in the list
   response = req(curl.get(), HTTPMethod::GET, "http://localhost/api/v1/sessions");
@@ -252,6 +253,17 @@ TEST_CASE("Sessions APIs", "[API]") {
   auto sessions2 = rfl::json::read<StreamSessionListResponse>(response->second).value();
   REQUIRE(sessions2.success);
   REQUIRE(sessions2.sessions.size() == 1);
+
+  // TODO: breaks Github CI
+  // // Test that we can send input to a session
+  // auto input_request = StreamSessionHandleInputRequest{
+  //     .session_id = "10594003729173467913",
+  //     // example CONTROLLER_MULTI packet
+  //     .input_packet_hex = "060222000000001E0C0000001A000000010014000010000000000000000000009C0000005500"};
+  // response =
+  //     req(curl.get(), HTTPMethod::POST, "http://localhost/api/v1/sessions/input", rfl::json::write(input_request));
+  // REQUIRE(response);
+  // REQUIRE_THAT(response->second, Equals("{\"success\":true}"));
 
   // Test that we can pause a session
   auto pause_request = StreamSessionPauseRequest{.session_id = "10594003729173467913"};

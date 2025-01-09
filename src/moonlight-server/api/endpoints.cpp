@@ -1,4 +1,5 @@
 #include <api/api.hpp>
+#include <control/input_handler.hpp>
 #include <state/config.hpp>
 #include <state/sessions.hpp>
 
@@ -148,11 +149,39 @@ void UnixSocketServer::endpoint_StreamSessionAdd(const HTTPRequest &req, std::sh
         [new_session](const immer::vector<events::StreamSession> &ses_v) { return ses_v.push_back(*new_session); });
     state_->app_state->event_bus->fire_event(immer::box<events::StreamSession>(*new_session));
 
-    auto res = GenericSuccessResponse{.success = true};
+    auto res = StreamSessionCreated{.success = true, .session_id = std::to_string(new_session->session_id)};
     send_http(socket, 200, rfl::json::write(res));
   } else {
     logs::log(logs::warning, "[API] Invalid event: {} - {}", req.body, session.error()->what());
     auto res = GenericErrorResponse{.error = session.error()->what()};
+    send_http(socket, 500, rfl::json::write(res));
+  }
+}
+
+void UnixSocketServer::endpoint_StreamSessionStart(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket) {
+  auto start_req = rfl::json::read<StreamSessionStartRequest>(req.body);
+  if (start_req) {
+    auto sessions = state_->app_state->running_sessions->load();
+    auto session_id = std::stoul(start_req.value().session_id);
+    if (auto session = state::get_session_by_id(sessions.get(), session_id)) {
+      auto video_session = start_req.value().video_session;
+      video_session.session_id = session_id; // Can't be JSON encoded
+      state_->app_state->event_bus->fire_event(immer::box<events::VideoSession>(video_session));
+
+      auto audio_session = start_req.value().audio_session;
+      audio_session.session_id = session_id; // Can't be JSON encoded
+      state_->app_state->event_bus->fire_event(immer::box<events::AudioSession>(audio_session));
+
+      auto res = GenericSuccessResponse{.success = true};
+      send_http(socket, 200, rfl::json::write(res));
+    } else {
+      logs::log(logs::warning, "[API] Invalid session_id: {}", session.value().session_id);
+      auto res = GenericErrorResponse{.error = "Invalid session_id"};
+      send_http(socket, 500, rfl::json::write(res));
+    }
+  } else {
+    logs::log(logs::warning, "[API] Invalid event: {} - {}", req.body, start_req.error()->what());
+    auto res = GenericErrorResponse{.error = start_req.error()->what()};
     send_http(socket, 500, rfl::json::write(res));
   }
 }
@@ -199,6 +228,28 @@ void UnixSocketServer::endpoint_StreamSessionStop(const HTTPRequest &req, std::s
     logs::log(logs::warning, "[API] Invalid event: {} - {}", req.body, session.error()->what());
     auto res = GenericErrorResponse{.error = session.error()->what()};
     send_http(socket, 500, rfl::json::write(res));
+  }
+}
+
+void UnixSocketServer::endpoint_StreamSessionHandleInput(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket) {
+  auto input_request = rfl::json::read<StreamSessionHandleInputRequest>(req.body);
+  if (input_request) {
+    auto sessions = state_->app_state->running_sessions->load();
+    auto session_id = std::stoul(input_request.value().session_id);
+    if (auto session = state::get_session_by_id(sessions.get(), session_id)) {
+      auto hex_pkt = input_request.value().input_packet_hex.get();
+      auto pkt_parsed = crypto::hex_to_str(hex_pkt);
+      control::INPUT_PKT *input_pkt = reinterpret_cast<control::INPUT_PKT *>(pkt_parsed.data());
+      control::handle_input(session.value(), {}, input_pkt);
+
+      send_http(socket, 200, rfl::json::write(GenericSuccessResponse{.success = true}));
+    } else {
+      logs::log(logs::warning, "[API] Invalid session_id: {}", input_request.value().session_id);
+      send_http(socket, 500, rfl::json::write(GenericErrorResponse{.error = "Invalid session_id"}));
+    }
+  } else {
+    logs::log(logs::warning, "[API] Invalid event: {} - {}", req.body, input_request.error()->what());
+    send_http(socket, 500, rfl::json::write(GenericErrorResponse{.error = input_request.error()->what()}));
   }
 }
 

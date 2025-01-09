@@ -3,6 +3,7 @@
 #include <api/http_server.hpp>
 #include <events/events.hpp>
 #include <events/reflectors.hpp>
+#include <moonlight/control.hpp>
 #include <state/data-structures.hpp>
 
 namespace wolf::api {
@@ -49,9 +50,21 @@ struct AppDeleteRequest {
   std::string id;
 };
 
+struct StreamSessionCreated {
+  bool success = true;
+  std::string session_id;
+};
+
 struct StreamSessionListResponse {
   bool success = true;
   std::vector<rfl::Reflector<wolf::core::events::StreamSession>::ReflType> sessions;
+};
+
+struct StreamSessionStartRequest {
+  std::string session_id;
+
+  wolf::core::events::VideoSession video_session;
+  wolf::core::events::AudioSession audio_session;
 };
 
 struct StreamSessionPauseRequest {
@@ -60,6 +73,14 @@ struct StreamSessionPauseRequest {
 
 struct StreamSessionStopRequest {
   std::string session_id;
+};
+
+struct StreamSessionHandleInputRequest {
+  std::string session_id;
+  rfl::Description<"A HEX encoded Moonlight input packet, for the full format see: "
+                   "games-on-whales.github.io/wolf/stable/protocols/input-data.html",
+                   std::string>
+      input_packet_hex;
 };
 
 struct RunnerStartRequest {
@@ -96,8 +117,10 @@ private:
 
   void endpoint_StreamSessions(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionAdd(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
+  void endpoint_StreamSessionStart(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionPause(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
   void endpoint_StreamSessionStop(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
+  void endpoint_StreamSessionHandleInput(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
 
   void endpoint_RunnerStart(const HTTPRequest &req, std::shared_ptr<UnixSocket> socket);
 

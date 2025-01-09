@@ -120,9 +120,20 @@ UnixSocketServer::UnixSocketServer(boost::asio::io_context &io_context,
           .request_description =
               APIDescription{
                   .json_schema = rfl::json::to_schema<rfl::Reflector<wolf::core::events::StreamSession>::ReflType>()},
-          .response_description = {{200, {.json_schema = rfl::json::to_schema<GenericSuccessResponse>()}},
+          .response_description = {{200, {.json_schema = rfl::json::to_schema<StreamSessionCreated>()}},
                                    {500, {.json_schema = rfl::json::to_schema<GenericErrorResponse>()}}},
           .handler = [this](auto req, auto socket) { endpoint_StreamSessionAdd(req, socket); },
+      });
+
+  state_->http.add(
+      HTTPMethod::POST,
+      "/api/v1/sessions/start",
+      {
+          .summary = "Start a stream session",
+          .request_description = APIDescription{.json_schema = rfl::json::to_schema<StreamSessionStartRequest>()},
+          .response_description = {{200, {.json_schema = rfl::json::to_schema<GenericSuccessResponse>()}},
+                                   {500, {.json_schema = rfl::json::to_schema<GenericErrorResponse>()}}},
+          .handler = [this](auto req, auto socket) { endpoint_StreamSessionStart(req, socket); },
       });
 
   state_->http.add(
@@ -145,6 +156,17 @@ UnixSocketServer::UnixSocketServer(boost::asio::io_context &io_context,
           .response_description = {{200, {.json_schema = rfl::json::to_schema<GenericSuccessResponse>()}},
                                    {500, {.json_schema = rfl::json::to_schema<GenericErrorResponse>()}}},
           .handler = [this](auto req, auto socket) { endpoint_StreamSessionStop(req, socket); },
+      });
+
+  state_->http.add(
+      HTTPMethod::POST,
+      "/api/v1/sessions/input",
+      {
+          .summary = "Handle input for a stream session",
+          .request_description = APIDescription{.json_schema = rfl::json::to_schema<StreamSessionHandleInputRequest>()},
+          .response_description = {{200, {.json_schema = rfl::json::to_schema<GenericSuccessResponse>()}},
+                                   {500, {.json_schema = rfl::json::to_schema<GenericErrorResponse>()}}},
+          .handler = [this](auto req, auto socket) { endpoint_StreamSessionHandleInput(req, socket); },
       });
 
   state_->http.add(HTTPMethod::POST,
