@@ -341,7 +341,7 @@ video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 plugin_name = "vaapi"
 check_elements = ["vaav1enc", "videoconvertscale"]
 encoder_pipeline = """
-vaav1enc gop-size=0 ref-frames=1 bitrate={bitrate} rate-control=cbr !
+vaav1enc ref-frames=1 bitrate={bitrate} rate-control=cbr target-usage=6 !
 av1parse !
 video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 """
@@ -350,7 +350,7 @@ video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 plugin_name = "vaapi"
 check_elements = ["vaav1lpenc", "videoconvertscale"] # LP = Low Power
 encoder_pipeline = """
-vaav1lpenc gop-size=0 ref-frames=1 bitrate={bitrate} rate-control=cbr !
+vaav1lpenc ref-frames=1 bitrate={bitrate} rate-control=cbr target-usage=6 !
 av1parse !
 video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 """
