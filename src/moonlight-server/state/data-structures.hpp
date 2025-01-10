@@ -191,7 +191,7 @@ static const audio::AudioMode &get_audio_mode(int channels, bool high_quality) {
     base_index = 1;
   } else if (channels == 8) {
     base_index = 2;
-  } else {
+  } else if (channels != 2) {
     logs::log(logs::warning, "Moonlight requested an impossible number of channels: {}", channels);
   }
 

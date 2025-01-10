@@ -172,7 +172,7 @@ source = "audiotestsrc wave=ticks is-live=true"
 
 [gstreamer.video]
 
-default_source = "interpipesrc listen-to={session_id}_video is-live=true stream-sync=restart-ts max-bytes=0 max-buffers=3 block=false"
+default_source = 'interpipesrc listen-to={session_id}_video is-live=true stream-sync=restart-ts max-buffers=1 block=false'
 default_sink = """
 rtpmoonlightpay_video name=moonlight_pay \
 payload_size={payload_size} fec_percentage={fec_percentage} min_required_fec_packets={min_required_fec_packets} !
@@ -184,7 +184,7 @@ udpsink bind-port={host_port} host={client_ip} port={client_port} sync=true\
 # To avoid repetition between H264, HEVC and AV1 encoders
 [gstreamer.video.defaults.nvcodec]
 video_params = """
-queue !
+queue leaky=downstream max-size-buffers=1 !
 cudaupload !
 cudaconvertscale !
 video/x-raw(memory:CUDAMemory), width={width}, height={height}, \
@@ -193,14 +193,14 @@ chroma-site={color_range}, format=NV12, colorimetry={color_space}, pixel-aspect-
 
 [gstreamer.video.defaults.qsv]
 video_params = """
-queue !
+queue leaky=downstream max-size-buffers=1 !
 videoconvertscale !
 video/x-raw, chroma-site={color_range}, width={width}, height={height}, format=NV12, colorimetry={color_space}\
 """
 
 [gstreamer.video.defaults.vaapi]
 video_params = """
-queue !
+queue leaky=downstream max-size-buffers=1 !
 videoconvertscale !
 video/x-raw, chroma-site={color_range}, width={width}, height={height}, format=NV12, colorimetry={color_space}\
 """
@@ -342,7 +342,7 @@ video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 plugin_name = "vaapi"
 check_elements = ["vaav1enc", "videoconvertscale"]
 encoder_pipeline = """
-vaav1enc gop-size=0 ref-frames=1 bitrate={bitrate} rate-control=cbr !
+vaav1enc ref-frames=1 bitrate={bitrate} rate-control=cbr target-usage=6 !
 av1parse !
 video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 """
@@ -351,7 +351,7 @@ video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 plugin_name = "vaapi"
 check_elements = ["vaav1lpenc", "videoconvertscale"] # LP = Low Power
 encoder_pipeline = """
-vaav1lpenc gop-size=0 ref-frames=1 bitrate={bitrate} rate-control=cbr !
+vaav1lpenc ref-frames=1 bitrate={bitrate} rate-control=cbr target-usage=6 !
 av1parse !
 video/x-av1, stream-format=obu-stream, alignment=frame, profile=main\
 """

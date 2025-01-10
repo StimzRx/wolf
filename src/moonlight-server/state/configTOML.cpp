@@ -16,6 +16,7 @@ namespace state {
  */
 constexpr char const *default_toml =
 #include "default/config.include.toml"
+
     ;
 
 using namespace std::literals;
@@ -131,7 +132,7 @@ Config load_or_default(const std::string &source,
   if (default_gst_video_settings.default_source.find("appsrc") != std::string::npos) {
     logs::log(logs::debug, "Found appsrc in default_source, migrating to interpipesrc");
     default_gst_video_settings.default_source = "interpipesrc listen-to={session_id}_video is-live=true "
-                                                "stream-sync=restart-ts max-bytes=0 max-buffers=3 block=false";
+                                                "stream-sync=restart-ts max-buffers=1 block=false";
   }
 
   auto default_gst_audio_settings = cfg.gstreamer.audio;
@@ -140,7 +141,25 @@ Config load_or_default(const std::string &source,
     default_gst_audio_settings.default_source = "interpipesrc listen-to={session_id}_audio is-live=true "
                                                 "stream-sync=restart-ts max-bytes=0 max-buffers=3 block=false";
   }
+
   auto default_gst_encoder_settings = default_gst_video_settings.defaults;
+  auto update_leaky_queue = [](std::string &pipeline) {
+    std::string old_str = "queue";
+    auto replace_pos = pipeline.find(old_str);
+    pipeline.replace(replace_pos, old_str.size(), "queue leaky=downstream max-size-buffers=1 ");
+  };
+  if (default_gst_encoder_settings["nvcodec"].video_params.find("queue !") != std::string::npos) {
+    logs::log(logs::debug, "Found leaky queue in nvcodec, migrating to queue leaky=downstream");
+    update_leaky_queue(default_gst_encoder_settings["nvcodec"].video_params);
+  }
+  if (default_gst_encoder_settings["vaapi"].video_params.find("queue !") != std::string::npos) {
+    logs::log(logs::debug, "Found leaky queue in vaapi, migrating to queue leaky=downstream");
+    update_leaky_queue(default_gst_encoder_settings["vaapi"].video_params);
+  }
+  if (default_gst_encoder_settings["qsv"].video_params.find("queue !") != std::string::npos) {
+    logs::log(logs::debug, "Found leaky queue in qsv, migrating to queue leaky=downstream");
+    update_leaky_queue(default_gst_encoder_settings["qsv"].video_params);
+  }
 
   auto default_app_render_node = utils::get_env("WOLF_RENDER_NODE", "/dev/dri/renderD128");
   auto default_gst_render_node = utils::get_env("WOLF_ENCODER_NODE", default_app_render_node);
