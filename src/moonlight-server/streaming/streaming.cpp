@@ -81,9 +81,9 @@ void start_video_producer(std::size_t session_id,
                           const wolf::core::virtual_display::DisplayMode &display_mode,
                           const std::shared_ptr<events::EventBusType> &event_bus) {
   auto appsrc_state = streaming::custom_src::setup_app_src(display_mode, std::move(wl_state));
-  auto pipeline = fmt::format("appsrc is-live=true name=wolf_wayland_source ! "                              //
-                              "queue leaky=downstream max-size-buffers=1 ! "                                                                     //
-                              "interpipesink name={}_video max-buffers=1", //
+  auto pipeline = fmt::format("appsrc is-live=true name=wolf_wayland_source ! " //
+                              "queue leaky=downstream max-size-buffers=1 ! "    //
+                              "interpipesink name={}_video max-buffers=1",      //
                               session_id);
   logs::log(logs::debug, "[GSTREAMER] Starting video producer: {}", pipeline);
   run_pipeline(pipeline, [=](auto pipeline, auto loop) {
@@ -129,15 +129,14 @@ void start_audio_producer(std::size_t session_id,
                           int channel_count,
                           const std::string &sink_name,
                           const std::string &server_name) {
-  auto pipeline = fmt::format(
-      "pulsesrc device=\"{sink_name}\" server=\"{server_name}\" ! " //
-      "audio/x-raw, channels={channels}, rate=48000 ! "             //
-      "queue leaky=downstream max-size-buffers=3 ! "                                                    //
-      "interpipesink name=\"{session_id}_audio\" sync=true async=false max-buffers=3",
-      fmt::arg("session_id", session_id),
-      fmt::arg("channels", channel_count),
-      fmt::arg("sink_name", sink_name),
-      fmt::arg("server_name", server_name));
+  auto pipeline = fmt::format("pulsesrc device=\"{sink_name}\" server=\"{server_name}\" ! " //
+                              "audio/x-raw, channels={channels}, rate=48000 ! "             //
+                              "queue leaky=downstream max-size-buffers=3 ! "                //
+                              "interpipesink name=\"{session_id}_audio\" sync=true async=false max-buffers=3",
+                              fmt::arg("session_id", session_id),
+                              fmt::arg("channels", channel_count),
+                              fmt::arg("sink_name", sink_name),
+                              fmt::arg("server_name", server_name));
   logs::log(logs::debug, "[GSTREAMER] Starting audio producer: {}", pipeline);
 
   run_pipeline(pipeline, [=](auto pipeline, auto loop) {
