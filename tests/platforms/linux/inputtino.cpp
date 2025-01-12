@@ -188,7 +188,7 @@ TEST_CASE("uinput - mouse", "[UINPUT]") {
   libevdev_ptr mouse_rel_dev(libevdev_new(), ::libevdev_free);
   libevdev_ptr mouse_abs_dev(libevdev_new(), ::libevdev_free);
   auto mouse = std::make_shared<std::optional<events::MouseTypes>>(std::move(*Mouse::create()));
-  auto session = events::StreamSession{.mouse = mouse};
+  auto session = events::StreamSession{.display_mode = {.width = 1920, .height = 1080}, .mouse = mouse};
 
   link_devnode(mouse_rel_dev.get(), std::get<state::input::Mouse>(mouse->value()).get_nodes()[0]);
   link_devnode(mouse_abs_dev.get(), std::get<state::input::Mouse>(mouse->value()).get_nodes()[1]);
@@ -207,18 +207,18 @@ TEST_CASE("uinput - mouse", "[UINPUT]") {
     REQUIRE(events.size() == 2);
     REQUIRE_THAT(libevdev_event_type_get_name(events[0]->type), Equals("EV_REL"));
     REQUIRE_THAT(libevdev_event_code_get_name(events[0]->type, events[0]->code), Equals("REL_X"));
-    REQUIRE(10 == mv_packet.delta_x);
+    REQUIRE(events[0]->value > 0);
 
     REQUIRE_THAT(libevdev_event_type_get_name(events[1]->type), Equals("EV_REL"));
     REQUIRE_THAT(libevdev_event_code_get_name(events[1]->type, events[1]->code), Equals("REL_Y"));
-    REQUIRE(20 == mv_packet.delta_y);
+    REQUIRE(events[1]->value > 0);
   }
 
   SECTION("Mouse move absolute") {
-    auto mv_packet = pkts::MOUSE_MOVE_ABS_PACKET{.x = boost::endian::native_to_big((short)10),
-                                                 .y = boost::endian::native_to_big((short)20),
-                                                 .width = boost::endian::native_to_big((short)1920),
-                                                 .height = boost::endian::native_to_big((short)1080)};
+    auto mv_packet = pkts::MOUSE_MOVE_ABS_PACKET{.x = boost::endian::native_to_big((short)100),
+                                                 .y = boost::endian::native_to_big((short)200),
+                                                 .width = boost::endian::native_to_big((short)1280),
+                                                 .height = boost::endian::native_to_big((short)720)};
     mv_packet.type = pkts::MOUSE_MOVE_ABS;
 
     control::handle_input(session, {}, &mv_packet);
@@ -226,9 +226,11 @@ TEST_CASE("uinput - mouse", "[UINPUT]") {
     REQUIRE(events.size() == 2);
     REQUIRE_THAT(libevdev_event_type_get_name(events[0]->type), Equals("EV_ABS"));
     REQUIRE_THAT(libevdev_event_code_get_name(events[0]->type, events[0]->code), Equals("ABS_X"));
+    REQUIRE(events[0]->value > 0);
 
     REQUIRE_THAT(libevdev_event_type_get_name(events[1]->type), Equals("EV_ABS"));
     REQUIRE_THAT(libevdev_event_code_get_name(events[1]->type, events[1]->code), Equals("ABS_Y"));
+    REQUIRE(events[1]->value > 0);
   }
 
   SECTION("Mouse press button") {
@@ -295,8 +297,8 @@ TEST_CASE("uinput - mouse", "[UINPUT]") {
 TEST_CASE("uinput - joypad", "[UINPUT]") {
   SECTION("OLD Moonlight: create joypad on first packet arrival") {
     events::App app = {};
-    auto session =
-        events::StreamSession{.event_bus = std::make_shared<events::EventBusType>(), .app = std::make_shared<events::App>(app)};
+    auto session = events::StreamSession{.event_bus = std::make_shared<events::EventBusType>(),
+                                         .app = std::make_shared<events::App>(app)};
     short controller_number = 1;
     auto c_pkt =
         pkts::CONTROLLER_MULTI_PACKET{.controller_number = controller_number, .button_flags = pkts::RIGHT_STICK};
@@ -311,8 +313,8 @@ TEST_CASE("uinput - joypad", "[UINPUT]") {
 
   SECTION("NEW Moonlight: create joypad with CONTROLLER_ARRIVAL") {
     events::App app = {};
-    auto session =
-        events::StreamSession{.event_bus = std::make_shared<events::EventBusType>(), .app = std::make_shared<events::App>(app)};
+    auto session = events::StreamSession{.event_bus = std::make_shared<events::EventBusType>(),
+                                         .app = std::make_shared<events::App>(app)};
     uint8_t controller_number = 1;
     auto c_pkt = pkts::CONTROLLER_ARRIVAL_PACKET{.controller_number = controller_number,
                                                  .controller_type = pkts::XBOX,

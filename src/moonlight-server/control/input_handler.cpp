@@ -237,8 +237,8 @@ static inline float deg2rad(float degree) {
 void mouse_move_rel(const MOUSE_MOVE_REL_PACKET &pkt, events::StreamSession &session) {
   if (session.mouse->has_value()) {
     auto pointer_acceleration = session.client_settings->mouse_acceleration;
-    short delta_x = boost::endian::big_to_native(pkt.delta_x) * pointer_acceleration;
-    short delta_y = boost::endian::big_to_native(pkt.delta_y) * pointer_acceleration;
+    auto delta_x = static_cast<float>(boost::endian::big_to_native(pkt.delta_x)) * pointer_acceleration;
+    auto delta_y = static_cast<float>(boost::endian::big_to_native(pkt.delta_y)) * pointer_acceleration;
     std::visit([delta_x, delta_y](auto &mouse) { mouse.move(delta_x, delta_y); }, session.mouse->value());
   } else {
     logs::log(logs::warning, "Received MOUSE_MOVE_REL_PACKET but no mouse device is present");
@@ -248,11 +248,20 @@ void mouse_move_rel(const MOUSE_MOVE_REL_PACKET &pkt, events::StreamSession &ses
 void mouse_move_abs(const MOUSE_MOVE_ABS_PACKET &pkt, events::StreamSession &session) {
   if (session.mouse->has_value()) {
     auto pointer_acceleration = session.client_settings->mouse_acceleration;
-    float x = boost::endian::big_to_native(pkt.x) * pointer_acceleration;
-    float y = boost::endian::big_to_native(pkt.y) * pointer_acceleration;
-    float width = boost::endian::big_to_native(pkt.width);
-    float height = boost::endian::big_to_native(pkt.height);
-    std::visit([x, y, width, height](auto &mouse) { mouse.move_abs(x, y, width, height); }, session.mouse->value());
+    float x = boost::endian::big_to_native(pkt.x);
+    float y = boost::endian::big_to_native(pkt.y);
+    float window_width = boost::endian::big_to_native(pkt.width);
+    float window_height = boost::endian::big_to_native(pkt.height);
+
+    auto absolute_x = (x / window_width) * static_cast<float>(session.display_mode.width) * pointer_acceleration;
+    auto absolute_y = (y / window_height) * static_cast<float>(session.display_mode.height) * pointer_acceleration;
+
+    std::visit([absolute_x,
+                absolute_y,
+                screen_width = session.display_mode.width,
+                screen_height = session.display_mode.height](
+                   auto &mouse) { mouse.move_abs(absolute_x, absolute_y, screen_width, screen_height); },
+               session.mouse->value());
   } else {
     logs::log(logs::warning, "Received MOUSE_MOVE_ABS_PACKET but no mouse device is present");
   }
