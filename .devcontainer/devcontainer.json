@@ -61,6 +61,11 @@
   },
   "customizations": {
     "vscode": {
+      "settings": {
+        "cmake.configureArgs": [
+          "-DCMAKE_CXX_FLAGS=-Wno-missing-template-arg-list-after-template-kw"
+        ]
+      },
       "extensions": [
         "ms-vscode.cpptools-extension-pack",
         "ms-azuretools.vscode-docker",
