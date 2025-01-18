@@ -5,7 +5,7 @@
     "dockerfile": "../docker/wolf.Dockerfile",
     "target": "wolf-builder"
   },
-  "postStartCommand": "bash /workspaces/wolf/.devcontainer/dev-setup.sh",
+  "postStartCommand": "bash $(pwd)/.devcontainer/dev-setup.sh",
   "features": {
     "ghcr.io/nils-geistmann/devcontainers-features/zsh:0": {
       "plugins": [
@@ -30,7 +30,7 @@
     "-v",
     "/run/udev:/run/udev:ro",
     "-v",
-    "/var/run/docker.sock",
+    "/var/run/docker.sock:/var/run/docker.sock:ro",
     "--rm"
   ],
   "hostRequirements": {
