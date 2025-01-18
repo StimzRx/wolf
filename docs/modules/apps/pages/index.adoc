@@ -40,13 +40,14 @@ For example, say that you want to add another emulator to `ES-DE`:
 docker build -t gow/es-de:custom --build-arg BASE_APP_IMAGE=ghcr.io/games-on-whales/base-app:edge images/es-de .
 ----
 
-* Finally, update the `config.toml` file in the Wolf repo to use the new image.
+* Finally, update the `config.toml` file in Wolf to use the new image.
 Just change the `image` field under `[apps.runner]` to the newly locally built `gow/es-de:custom`.
+* Don't forget to contribute back by creating a pull request in https://github.com/games-on-whales/gow[games-on-whales/gow]!
 
 .I want to edit something in `base` or `base-app`
 [%collapsible]
 ====
-Our builds are hierarchical, all images are based on `base-app` which is based on `base`.
+Our builds are hierarchical: all images are based on `base-app` which is based on `base`.
 You can build them with:
 
 [source,shell]
@@ -63,11 +64,10 @@ Here's an example of running Steam inside Docker *on a Wayland host* without ins
 
 [source,shell]
 ----
-  --rm -it \
+  docker run --name=steam --rm -it \
   --device=/dev/dri/renderD128 \
   --device=/dev/dri/card0 \
   --ipc=host \
-docker run --name=steam \
   --cap-add=ALL \
   --security-opt seccomp=unconfined \
   -e XDG_RUNTIME_DIR=/tmp \
@@ -84,3 +84,5 @@ image::ROOT:steam-on-desktop.png[A screenshot of Steam running on a Wayland desk
 
 Depending on your host setup, you might need to adjust this command. +
 For example, for *Nvidia users* with the container toolkit installed you might need to add `--gpus=all` instead of `--device=/dev/dri/renderD128 --device=/dev/dri/card0` and `-e NVIDIA_DRIVER_CAPABILITIES=all` to the environment variables.
+
+In the command above `/tmp/SteamGOWData` in your host is where the home folder (containing Steam client and settings in this example) will be stored, make sure to adjust that to your liking. +
