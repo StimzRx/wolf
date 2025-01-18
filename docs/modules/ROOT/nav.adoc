@@ -7,6 +7,7 @@
 ** xref:apps:index.adoc[]
 *** xref:apps:steam.adoc[]
 *** xref:apps:pegasus.adoc[]
+*** xref:apps:prismlauncher.adoc[]
 
 * Developer guide
 ** xref:dev:how-it-works.adoc[]
